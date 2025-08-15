@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis Interactivo: La Dieta de la Milpa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Tierra y Maíz -->
+    <!-- Application Structure Plan: Se ha diseñado una aplicación de una sola página con una navegación superior fija para guiar al usuario a través de un flujo lógico. Comienza con una introducción (Inicio), presenta el contexto del problema de salud en México con gráficos interactivos (El Problema), ofrece la Dieta de la Milpa como solución con un diagrama explorable (La Solución), detalla su filosofía (Componentes) y finalmente, ofrece una perspectiva comparativa. Esta estructura temática, en lugar de lineal, permite al usuario explorar la información según su interés, ya sea en los datos duros, los detalles de la dieta o su base cultural, mejorando la usabilidad y la asimilación del contenido del informe. -->
+    <!-- Visualization & Content Choices: Para la sección 'El Problema', se eligieron gráficos de barras de Chart.js para visualizar las estadísticas de sobrepeso y obesidad. El objetivo es comparar datos a lo largo del tiempo y entre demografías. La interacción mediante botones permite al usuario filtrar por grupo de edad, lo que hace que los datos complejos sean más accesibles y personales. Para 'La Solución', se creó un diagrama radial interactivo con HTML/Tailwind para organizar los grupos de alimentos. El objetivo es organizar la información de forma visual. Al hacer clic, se revela información detallada, fomentando la exploración. Esta elección evita una larga lista de texto y presenta la dieta de forma intuitiva. Se confirma el uso exclusivo de Canvas para gráficos. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FDFBF5;
+            color: #4F4A45;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 400px;
+            max-height: 50vh;
+        }
+        .nav-link {
+            transition: color 0.3s, border-color 0.3s;
+        }
+        .active-nav {
+            color: #C18239;
+            border-bottom-color: #C18239;
+        }
+        .food-item {
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .food-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-[#FDFBF5]/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-xl md:text-2xl font-bold text-[#6C584C]">Dieta de la Milpa</h1>
+            <div class="hidden md:flex space-x-8">
+                <a href="#inicio" class="nav-link text-gray-600 hover:text-[#C18239] border-b-2 border-transparent pb-1">Inicio</a>
+                <a href="#problema" class="nav-link text-gray-600 hover:text-[#C18239] border-b-2 border-transparent pb-1">El Problema</a>
+                <a href="#solucion" class="nav-link text-gray-600 hover:text-[#C18239] border-b-2 border-transparent pb-1">La Solución</a>
+                <a href="#componentes" class="nav-link text-gray-600 hover:text-[#C18239] border-b-2 border-transparent pb-1">Componentes</a>
+            </div>
+            <button id="mobile-menu-button" class="md:hidden text-2xl">☰</button>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden bg-[#FDFBF5] py-4">
+            <a href="#inicio" class="block text-center py-2 text-gray-600 hover:text-[#C18239]">Inicio</a>
+            <a href="#problema" class="block text-center py-2 text-gray-600 hover:text-[#C18239]">El Problema</a>
+            <a href="#solucion" class="block text-center py-2 text-gray-600 hover:text-[#C18239]">La Solución</a>
+            <a href="#componentes" class="block text-center py-2 text-gray-600 hover:text-[#C18239]">Componentes</a>
+        </div>
+    </header>
+
+    <main>
+        <section id="inicio" class="py-16 md:py-24 bg-cover bg-center" style="background-image: linear-gradient(rgba(253, 251, 245, 0.8), rgba(253, 251, 245, 1)), url('https://placehold.co/1200x600/A1A1AA/4F4A45?text=Milpa');">
+            <div class="container mx-auto px-6 text-center">
+                <h2 class="text-4xl md:text-5xl font-bold text-[#6C584C] mb-4">La Dieta de la Milpa: Corazón de la Cocina Mexicana</h2>
+                <p class="text-lg md:text-xl max-w-3xl mx-auto text-[#4F4A45]">
+                    Esta aplicación presenta un análisis interactivo del modelo de alimentación regional mexicano. La Dieta de la Milpa es una propuesta saludable, nutritiva y culturalmente pertinente que busca hacer frente a los problemas de salud pública en México, revalorizando los alimentos y saberes de nuestra tierra. Explore los datos, descubra los alimentos y comprenda la filosofía detrás de este sistema alimentario.
+                </p>
+            </div>
+        </section>
+
+        <section id="problema" class="py-16 md:py-24">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-[#6C584C] mb-4">El Problema: Sobrepeso y Obesidad en México</h2>
+                    <p class="max-w-3xl mx-auto text-lg">
+                        El informe destaca una creciente crisis de salud en México, impulsada por el abandono de dietas tradicionales en favor de alimentos ultraprocesados. Las siguientes gráficas, basadas en datos de las encuestas ENSANUT, muestran la evolución de las tasas de sobrepeso y obesidad en diferentes grupos de la población. Interactúe con los filtros para explorar la magnitud del problema.
+                    </p>
+                </div>
+
+                <div class="bg-white/50 rounded-2xl shadow-lg p-6 md:p-8">
+                    <div class="flex flex-wrap justify-center gap-2 md:gap-4 mb-8">
+                        <button class="filter-btn bg-[#A1A1AA] text-white py-2 px-4 rounded-full transition-colors duration-300" data-age-group="5-11">Niños (5-11 años)</button>
+                        <button class="filter-btn bg-[#A1A1AA] text-white py-2 px-4 rounded-full transition-colors duration-300" data-age-group="12-19">Adolescentes (12-19 años)</button>
+                        <button class="filter-btn bg-[#A1A1AA] text-white py-2 px-4 rounded-full transition-colors duration-300" data-age-group="20+">Adultos (20+ años)</button>
+                    </div>
+                    <h3 id="chart-title" class="text-2xl font-semibold text-center mb-4 text-[#6C584C]"></h3>
+                    <div class="chart-container">
+                        <canvas id="obesityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="solucion" class="py-16 md:py-24 bg-[#F4F1EA]">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-[#6C584C] mb-4">La Solución: Explorando la Dieta de la Milpa</h2>
+                    <p class="max-w-3xl mx-auto text-lg">
+                        La Dieta de la Milpa es un modelo de alimentación basado en la riqueza y diversidad de los alimentos mesoamericanos. No es solo una lista de ingredientes, sino un sistema integral que promueve la salud y respeta la cultura. Haga clic en cada grupo de alimentos para descubrir sus beneficios y su papel en una dieta equilibrada y sabrosa.
+                    </p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+                    <div class="md:col-span-8">
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 md:gap-6">
+                            <div class="food-item text-center p-4 bg-white rounded-2xl cursor-pointer" data-food="verduras">
+                                <div class="text-4xl mb-2">🥬</div>
+                                <h4 class="font-semibold">Verduras y Hortalizas</h4>
+                            </div>
+                            <div class="food-item text-center p-4 bg-white rounded-2xl cursor-pointer" data-food="frutas">
+                                <div class="text-4xl mb-2">🍓</div>
+                                <h4 class="font-semibold">Frutas</h4>
+                            </div>
+                            <div class="food-item text-center p-4 bg-white rounded-2xl cursor-pointer" data-food="leguminosas">
+                                <div class="text-4xl mb-2">🫘</div>
+                                <h4 class="font-semibold">Leguminosas</h4>
+                            </div>
+                            <div class="food-item text-center p-4 bg-white rounded-2xl cursor-pointer" data-food="cereales">
+                                <div class="text-4xl mb-2">🌽</div>
+                                <h4 class="font-semibold">Cereales Integrales</h4>
+                            </div>
+                             <div class="food-item text-center p-4 bg-white rounded-2xl cursor-pointer" data-food="grasas">
+                                <div class="text-4xl mb-2">🥑</div>
+                                <h4 class="font-semibold">Grasas Saludables</h4>
+                            </div>
+                            <div class="food-item text-center p-4 bg-white rounded-2xl cursor-pointer" data-food="animales">
+                                <div class="text-4xl mb-2">🥚</div>
+                                <h4 class="font-semibold">Productos de Origen Animal</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="food-info" class="md:col-span-4 bg-white rounded-2xl p-6 shadow-lg min-h-[300px]">
+                        <h3 id="info-title" class="text-2xl font-bold text-[#6C584C] mb-4">Seleccione un grupo</h3>
+                        <p id="info-text" class="text-[#4F4A45]">Haga clic en un grupo de alimentos para ver su descripción y los alimentos clave que lo componen.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="componentes" class="py-16 md:py-24">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-[#6C584C] mb-4">Los Tres Pilares de la Dieta</h2>
+                    <p class="max-w-3xl mx-auto text-lg">
+                        El modelo de la Dieta de la Milpa se sustenta en tres componentes interconectados que van más allá de la simple nutrición. Juntos, forman un enfoque holístico que considera el cuerpo, la cultura y la comunidad para lograr un bienestar integral y sostenible.
+                    </p>
+                </div>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="bg-white/50 rounded-2xl p-8 text-center shadow-lg">
+                        <div class="text-5xl mb-4 text-[#C18239]">🧬</div>
+                        <h3 class="text-2xl font-semibold mb-3 text-[#6C584C]">Componente Biológico</h3>
+                        <p>Se enfoca en los aspectos nutricionales y los beneficios para la salud de los alimentos mesoamericanos. Promueve un balance adecuado de nutrientes, antioxidantes, fibra y probióticos para prevenir enfermedades y fortalecer el organismo, comenzando desde la lactancia materna.</p>
+                    </div>
+                    <div class="bg-white/50 rounded-2xl p-8 text-center shadow-lg">
+                        <div class="text-5xl mb-4 text-[#C18239]">🌍</div>
+                        <h3 class="text-2xl font-semibold mb-3 text-[#6C584C]">Componente Cultural</h3>
+                        <p>Reconoce que la alimentación es un pilar de la identidad. Este componente valora los sabores, saberes, productos locales y tradiciones culinarias de cada región, entendiendo que el acto de comer está profundamente ligado a la historia, las festividades y la vida comunitaria.</p>
+                    </div>
+                    <div class="bg-white/50 rounded-2xl p-8 text-center shadow-lg">
+                        <div class="text-5xl mb-4 text-[#C18239]">🤝</div>
+                        <h3 class="text-2xl font-semibold mb-3 text-[#6C584C]">Componente Intercultural</h3>
+                        <p>Propone un diálogo de saberes entre el conocimiento científico y las prácticas tradicionales. Busca crear estrategias de alimentación que sean culturalmente pertinentes y respetuosas, facilitando su adopción por parte de las diversas comunidades del país para un impacto real y duradero.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-[#6C584C] text-[#FDFBF5] py-8">
+        <div class="container mx-auto px-6 text-center">
+            <p>Aplicación interactiva creada a partir del informe "La Dieta de la Milpa".</p>
+            <p class="text-sm mt-2 opacity-75">Este es un recurso educativo y no reemplaza el consejo médico profesional.</p>
+            <p class="mt-4 text-sm">
+                <a href="https://davidesaladopatino.github.io/dieta-milpa-infografia/" target="_blank" class="text-[#FDFBF5] hover:text-[#C18239] transition-colors duration-300">
+                    Ver la infografía del autor
+                </a>
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const chartData = {
+                "5-11": {
+                    title: "Sobrepeso y Obesidad en Niños (5-11 años)",
+                    labels: ['1999', '2020', '2022', '2023'],
+                    datasets: [
+                        {
+                            label: 'Sobrepeso',
+                            data: [10.9, 18.9, 18.4, 18.9],
+                            backgroundColor: '#A1A1AA',
+                        },
+                        {
+                            label: 'Obesidad',
+                            data: [9.0, 16.9, 17.1, 16.2],
+                            backgroundColor: '#6C584C',
+                        }
+                    ]
+                },
+                "12-19": {
+                    title: "Sobrepeso y Obesidad en Adolescentes (12-19 años)",
+                    labels: ['2006', '2012', '2018', '2021', '2023'],
+                    datasets: [
+                        {
+                            label: 'Sobrepeso',
+                            data: [20.9, 21.6, 23.8, 24.7, 21.4],
+                            backgroundColor: '#A1A1AA',
+                        },
+                        {
+                            label: 'Obesidad',
+                            data: [12.1, 13.3, 14.6, 17.1, 16.7],
+                            backgroundColor: '#6C584C',
+                        }
+                    ]
+                },
+                "20+": {
+                    title: "Sobrepeso y Obesidad en Adultos (20+ años)",
+                    labels: ['2012', '2021', '2023'],
+                    datasets: [
+                        {
+                            label: 'Sobrepeso Hombres',
+                            data: [42.6, 37.8, 40.1],
+                            backgroundColor: '#BDB2A9',
+                        },
+                        {
+                            label: 'Obesidad Hombres',
+                            data: [26.8, 31.8, 36.1],
+                            backgroundColor: '#6C584C',
+                        },
+                        {
+                            label: 'Sobrepeso Mujeres',
+                            data: [35.5, 33.9, 34.6],
+                            backgroundColor: '#D6CCC2',
+                        },
+                        {
+                            label: 'Obesidad Mujeres',
+                            data: [37.5, 41.1, 41.6],
+                            backgroundColor: '#4F4A45',
+                        }
+                    ]
+                }
+            };
+
+            const foodInfoData = {
+                verduras: {
+                    title: "Verduras y Hortalizas",
+                    text: "Son la base de la dieta. Ricas en fibra, vitaminas, minerales y antioxidantes. Se recomienda consumirlas diariamente y en abundancia. Alimentos clave: Quelites, nopales, calabaza, jitomate, chile, chayote, hongos."
+                },
+                frutas: {
+                    title: "Frutas",
+                    text: "Aportan vitaminas, minerales y antioxidantes. Se deben consumir enteras para aprovechar su fibra. Alimentos clave: Guanábana, tuna, papaya, zapote, guayaba, piña, pitahaya."
+                },
+                leguminosas: {
+                    title: "Leguminosas",
+                    text: "Excelente fuente de proteína vegetal. Combinadas con cereales como el maíz, ofrecen una proteína de alta calidad. Alimentos clave: Frijol en todas sus variedades, habas, lentejas, garbanzos."
+                },
+                cereales: {
+                    title: "Cereales Integrales",
+                    text: "Principal fuente de energía. El maíz, nixtamalizado, es el pilar. El amaranto es otro cereal fundamental por su alto valor proteico. Alimentos clave: Maíz, amaranto."
+                },
+                grasas: {
+                    title: "Grasas Saludables",
+                    text: "Fuentes de grasas cardioprotectoras y vitaminas. Son importantes para la absorción de nutrientes. Alimentos clave: Aguacate, pepitas de calabaza, chía, cacahuate, cacao."
+                },
+                animales: {
+                    title: "Productos de Origen Animal",
+                    text: "Aportan proteínas de alta calidad, vitaminas y minerales. Se recomienda un consumo moderado, prefiriendo pescado, huevo y aves de patio. Alimentos clave: Huevo, pescado, mariscos, guajolote, conejo. La carne roja se recomienda con muy poca frecuencia."
+                }
+            };
+
+            const ctx = document.getElementById('obesityChart').getContext('2d');
+            let myChart;
+
+            function createChart(data) {
+                if (myChart) {
+                    myChart.destroy();
+                }
+                myChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: data,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Prevalencia (%)'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Año de Encuesta'
+                                }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `${context.dataset.label}: ${context.raw}%`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            const chartTitle = document.getElementById('chart-title');
+
+            function updateChart(ageGroup) {
+                const data = chartData[ageGroup];
+                chartTitle.textContent = data.title;
+                createChart(data);
+                
+                filterButtons.forEach(btn => {
+                    if (btn.dataset.ageGroup === ageGroup) {
+                        btn.classList.remove('bg-[#A1A1AA]', 'text-white');
+                        btn.classList.add('bg-[#C18239]', 'text-white');
+                    } else {
+                        btn.classList.remove('bg-[#C18239]', 'text-white');
+                        btn.classList.add('bg-[#A1A1AA]', 'text-white');
+                    }
+                });
+            }
+
+            filterButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    updateChart(button.dataset.ageGroup);
+                });
+            });
+
+            updateChart('20+');
+
+            const foodItems = document.querySelectorAll('.food-item');
+            const infoTitle = document.getElementById('info-title');
+            const infoText = document.getElementById('info-text');
+
+            foodItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const foodKey = item.dataset.food;
+                    const data = foodInfoData[foodKey];
+                    infoTitle.textContent = data.title;
+                    infoText.textContent = data.text;
+
+                    foodItems.forEach(i => i.classList.remove('ring-2', 'ring-[#C18239]'));
+                    item.classList.add('ring-2', 'ring-[#C18239]');
+                });
+            });
+            
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+            
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('main section');
+
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (pageYOffset >= sectionTop - 60) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active-nav');
+                    if (link.getAttribute('href').includes(current)) {
+                        link.classList.add('active-nav');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
